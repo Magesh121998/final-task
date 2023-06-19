@@ -1,0 +1,47 @@
+---
+# tasks file for myrole
+- name: Deploy NGINX Deployment
+  k8s:
+    state: present
+    definition:
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: nginx-deployment
+        namespace: default
+        labels:
+          app: nginx
+      spec:
+        replicas: 1
+        selector:
+          matchLabels:
+            app: nginx
+        template:
+          metadata:
+            labels:
+              app: nginx
+          spec:
+            containers:
+              - name: nginx
+                image: "674398457277.dkr.ecr.ap-south-1.amazonaws.com/ansiblecr:latest"
+                ports:
+                  - containerPort: 80
+            imagePullSecrets:
+              - name: regcred 
+- name: Create NGINX Service
+  k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Service
+      metadata:
+        name: nginx-service
+        namespace: default
+      spec:
+        selector:
+          app: nginx
+        type: NodePort
+        ports:
+          - protocol: TCP
+            port: 8080
+            targetPort: 80
